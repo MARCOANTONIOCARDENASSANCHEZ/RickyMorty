@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07130f">
+    <title>Portal de personajes | Rick and Morty</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        :root {
+            color-scheme: dark;
+            --bg: #07130f;
+            --panel: rgba(16, 34, 28, .88);
+            --panel-soft: rgba(23, 47, 38, .78);
+            --green: #b7f34a;
+            --cyan: #68e7d0;
+            --text: #f0f6ee;
+            --muted: #9aada3;
+            --line: rgba(183, 243, 74, .19);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            background:
+                radial-gradient(ellipse at 14% 10%, rgba(42, 111, 77, .27), transparent 34rem),
+                radial-gradient(ellipse at 88% 42%, rgba(32, 103, 112, .15), transparent 32rem),
+                linear-gradient(145deg, #07130f 0%, #0a1915 54%, #09120f 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            content: '';
+            opacity: .32;
+            pointer-events: none;
+            background-image: radial-gradient(#d8f7de 1px, transparent 1px), radial-gradient(#a8f6e2 1px, transparent 1px);
+            background-size: 97px 97px, 151px 151px;
+            background-position: 14px 23px, 76px 89px;
+        }
+
+        .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+        header { height: 82px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,.07); }
+        .brand { display: flex; gap: 12px; align-items: center; color: var(--text); text-decoration: none; }
+        .brand-menu { position: relative; }
+        .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(183,243,74,.48); border-radius: 12px; background: rgba(183,243,74,.1); color: var(--green); font-size: 21px; box-shadow: 0 0 25px rgba(183,243,74,.12); cursor: pointer; list-style: none; }
+        .brand-mark::-webkit-details-marker { display: none; }
+        .brand-mark::marker { content: ''; }
+        .brand-mark:hover, .brand-mark:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+        .character-menu { position: absolute; z-index: 5; top: 48px; left: 0; width: min(280px, calc(100vw - 40px)); max-height: 340px; overflow-y: auto; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #10221c; box-shadow: 0 16px 35px rgba(0,0,0,.4); }
+        .character-menu strong { display: block; margin-bottom: 9px; color: var(--green); font: 600 12px 'Space Grotesk', sans-serif; }
+        .character-list { display: grid; gap: 0; }
+        .character-list p { display: flex; justify-content: space-between; gap: 12px; margin: 0; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.07); color: #c6d2ca; font-size: 12px; }
+        .character-list span { color: var(--muted); }
+        .brand-copy { display: grid; gap: 1px; }
+        .brand-copy strong { font: 700 14px 'Space Grotesk', sans-serif; letter-spacing: .02em; }
+        .brand-copy span { color: var(--muted); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
+        .sound-toggle { position: fixed; z-index: 20; top: 20px; right: max(20px, calc((100vw - 1120px) / 2)); display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid rgba(183,243,74,.42); border-radius: 13px; background: rgba(11,25,20,.92); color: var(--green); cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,.24); transition: background .2s, transform .2s, border-color .2s; }
+        .sound-toggle:hover { transform: translateY(-2px); border-color: var(--green); background: rgba(183,243,74,.12); }
+        .sound-toggle:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+        .sound-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+        #music-frame { position: fixed; width: 1px; height: 1px; border: 0; opacity: 0; pointer-events: none; }
+
+        main { padding: 76px 0 72px; }
+        .hero { max-width: 760px; margin: 0 auto 50px; text-align: center; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 20px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(183,243,74,.055); color: var(--green); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .eyebrow::before { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); content: ''; }
+        h1 { margin: 0; font: 400 clamp(3rem, 8vw, 5.5rem)/.98 'Creepster', 'Space Grotesk', sans-serif; letter-spacing: .015em; }
+        h1 span { color: var(--green); }
+        .intro { max-width: 510px; margin: 20px auto 28px; color: #afbeb6; font-size: 16px; line-height: 1.65; }
+
+        .search-box { display: flex; gap: 9px; max-width: 620px; margin: 0 auto; padding: 7px; border: 1px solid rgba(183,243,74,.27); border-radius: 16px; background: rgba(11,25,20,.91); box-shadow: 0 18px 65px rgba(0,0,0,.28), 0 0 35px rgba(183,243,74,.055); transition: border-color .2s, box-shadow .2s; }
+        .search-box:focus-within { border-color: rgba(183,243,74,.67); box-shadow: 0 18px 65px rgba(0,0,0,.28), 0 0 30px rgba(183,243,74,.12); }
+        .search-icon { align-self: center; margin-left: 13px; color: var(--green); font-size: 19px; }
+        .search-box input { min-width: 0; flex: 1; padding: 13px 8px; border: 0; outline: 0; background: transparent; color: var(--text); font: 500 15px 'DM Sans', sans-serif; }
+        .search-box input::placeholder { color: #788a80; }
+        .search-box button { padding: 0 22px; border: 0; border-radius: 11px; background: var(--green); color: #15220c; cursor: pointer; font: 700 14px 'Space Grotesk', sans-serif; transition: transform .2s, background .2s; }
+        .search-box button:hover { transform: translateY(-1px); background: #c8ff65; }
+        .search-box button:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+        .hint { margin: 13px 0 0; color: #71847a; font-size: 12px; }
+
+        .results-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 18px; }
+        .results-heading h2 { margin: 0; font: 400 25px 'Creepster', 'Space Grotesk', sans-serif; letter-spacing: .02em; }
+        .results-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+        .results-tools { display: flex; align-items: center; gap: 14px; }
+        .clear-button, .remove-card { border: 1px solid rgba(240,120,120,.28); border-radius: 9px; background: rgba(240,120,120,.08); color: #f3a0a0; cursor: pointer; font: 600 12px 'DM Sans', sans-serif; transition: background .2s, border-color .2s; }
+        .clear-button { padding: 9px 12px; }
+        .clear-button:hover, .remove-card:hover { border-color: rgba(240,120,120,.65); background: rgba(240,120,120,.16); }
+        #characters-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 17px; }
+        .card { overflow: hidden; border: 1px solid rgba(255,255,255,.085); border-radius: 17px; background: var(--panel); box-shadow: 0 14px 35px rgba(0,0,0,.17); transition: transform .22s, border-color .22s, box-shadow .22s; animation: rise .35s ease both; }
+        .card:hover { transform: translateY(-4px); border-color: rgba(183,243,74,.35); box-shadow: 0 18px 42px rgba(0,0,0,.28); }
+        .card-image { position: relative; aspect-ratio: 1.45 / 1; overflow: hidden; background: linear-gradient(135deg, #1d3930, #14231f); }
+        .card-image::after { position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(8,18,14,.65)); content: ''; pointer-events: none; }
+        .card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+        .card:hover img { transform: scale(1.045); }
+        .badge { position: absolute; z-index: 1; left: 13px; bottom: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(8,18,14,.78); color: #e7f0e9; font-size: 10px; font-weight: 700; backdrop-filter: blur(8px); }
+        .badge::before { width: 7px; height: 7px; border-radius: 50%; background: #a0a9a4; content: ''; }
+        .badge[data-status="alive"]::before { background: #a6ee5b; box-shadow: 0 0 8px #a6ee5b; }
+        .badge[data-status="dead"]::before { background: #f07878; box-shadow: 0 0 8px #f07878; }
+        .card-content { padding: 15px 16px 17px; }
+        .card-title-row { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+        .card-title-row h2 { min-width: 0; }
+        .remove-card { flex: 0 0 auto; padding: 6px 8px; }
+        .card h2 { margin: 0 0 14px; overflow-wrap: anywhere; font: 400 23px 'Creepster', 'Space Grotesk', sans-serif; letter-spacing: .015em; }
+        .card h2 small { color: #74867c; font-size: 12px; font-weight: 500; }
+        .details { display: grid; gap: 9px; margin: 0; }
+        .details div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+        .details dt { color: #778b80; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+        .details dd { margin: 0; overflow: hidden; color: #c6d2ca; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+        .message { grid-column: 1 / -1; margin: 0; padding: 34px 20px; border: 1px dashed rgba(183,243,74,.22); border-radius: 16px; background: rgba(16,34,28,.54); color: #b9c8bf; text-align: center; line-height: 1.6; }
+        .message.error { border-color: rgba(240,120,120,.3); }
+        .loader { display: inline-block; width: 15px; height: 15px; margin-right: 8px; border: 2px solid rgba(183,243,74,.25); border-top-color: var(--green); border-radius: 50%; vertical-align: -3px; animation: spin .7s linear infinite; }
+        .card { cursor: pointer; }
+        .card:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+        .modal { width: min(760px, calc(100% - 32px)); max-width: none; max-height: min(88vh, 760px); padding: 0; overflow: auto; border: 1px solid rgba(183,243,74,.32); border-radius: 22px; background: #0d1d17; color: var(--text); box-shadow: 0 28px 100px rgba(0,0,0,.65); }
+        .modal::backdrop { background: rgba(2,9,6,.78); backdrop-filter: blur(7px); }
+        .modal-layout { display: grid; grid-template-columns: minmax(240px, .9fr) 1.1fr; min-height: 410px; }
+        .modal-portrait { position: relative; min-height: 100%; background: linear-gradient(145deg, #1d3930, #14231f); }
+        .modal-portrait img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+        .modal-info { padding: 28px; }
+        .modal-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        .modal-kicker { color: var(--green); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+        .modal-close { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(255,255,255,.14); border-radius: 11px; background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; font-size: 22px; }
+        .modal-close:hover { border-color: var(--green); color: var(--green); }
+        .modal-title { margin: 18px 0 5px; font: 400 clamp(2rem, 5vw, 3rem)/1.05 'Creepster', 'Space Grotesk', sans-serif; letter-spacing: .015em; }
+        .modal-id { margin: 0 0 22px; color: var(--muted); font-size: 13px; }
+        .modal-status { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 22px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(255,255,255,.05); color: #e7f0e9; font-size: 12px; font-weight: 700; }
+        .modal-status::before { width: 8px; height: 8px; border-radius: 50%; background: #a0a9a4; content: ''; }
+        .modal-status[data-status="alive"]::before { background: #a6ee5b; box-shadow: 0 0 8px #a6ee5b; }
+        .modal-status[data-status="dead"]::before { background: #f07878; box-shadow: 0 0 8px #f07878; }
+        .modal-details { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0; }
+        .modal-details div { min-width: 0; padding: 12px; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; background: rgba(255,255,255,.025); }
+        .modal-details dt { margin-bottom: 6px; color: #82958a; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+        .modal-details dd { margin: 0; overflow-wrap: anywhere; color: #e1eae3; font-size: 13px; }
+        footer { padding: 19px 0 25px; border-top: 1px solid rgba(255,255,255,.07); color: #72847a; font-size: 11px; text-align: center; }
+        footer span { color: var(--green); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) {
+            .shell { width: min(100% - 28px, 1120px); }
+            header { height: 68px; }
+            main { padding: 54px 0 52px; }
+            .hero { margin-bottom: 38px; }
+            .intro { font-size: 14px; }
+            .search-box { gap: 4px; }
+            .search-box button { padding: 0 15px; }
+            #characters-container { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 13px; }
+            .results-heading { align-items: start; flex-direction: column; gap: 5px; }
+            .modal-layout { grid-template-columns: 1fr; }
+            .modal-portrait { min-height: 230px; aspect-ratio: 1.5; }
+            .modal-info { padding: 21px; }
+        }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    </style>
+</head>
+<body>
+    <button type="button" id="sound-toggle" class="sound-toggle" aria-label="Apagar música" aria-pressed="true" title="Apagar música">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    </button>
+    <audio id="site-music" src="WhatsApp%20Audio%202026-10-27%20at%207.00.57%20PM.mpeg" preload="auto" autoplay loop></audio>
+    <header>
+        <div class="shell">
+            <div class="brand">
+                <details class="brand-menu">
+                    <summary class="brand-mark" aria-label="Mostrar nombres de los personajes encontrados">✦</summary>
+                    <div class="character-menu">
+                        <strong>Personajes disponibles</strong>
+                        <div id="character-list" class="character-list" aria-label="Lista de personajes disponibles">
+                            <p>Cargando lista de personajes…</p>
+                        </div>
+                    </div>
+                </details>
+                <span class="brand-copy"><strong>PORTAL DE PERSONAJES</strong><span>Rick and Morty · Multiverso</span></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="eyebrow">Explora el multiverso</div>
+            <h1 id="page-title">¿A quién <span>buscamos?</span></h1>
+            <p class="intro">Encuentra personajes de otras dimensiones escribiendo su número de identificación.</p>
+            <form id="search-form" class="search-box" role="search">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <input type="text" id="search-input" placeholder="Escribe el ID del personaje, por ejemplo 1" autocomplete="off" aria-label="Número de identificación del personaje" inputmode="numeric" pattern="[0-9]+" maxlength="4" title="Escribe únicamente números" required>
+                <button type="submit" id="search-button">Buscar <span aria-hidden="true">↗</span></button>
+            </form>
+            <p class="hint">Consulta el desplegable de la estrella para encontrar los IDs disponibles.</p>
+        </section>
+
+        <section aria-labelledby="results-title">
+            <div class="results-heading">
+                <h2 id="results-title">Resultados de búsqueda</h2>
+                <div class="results-tools">
+                    <p id="results-caption">Personajes del universo de Rick and Morty</p>
+                    <button type="button" id="clear-results" class="clear-button">Limpiar todo</button>
+                </div>
+            </div>
+            <div id="characters-container" aria-live="polite" aria-busy="false"></div>
+        </section>
+    </main>
+
+    <dialog id="character-modal" class="modal" aria-labelledby="modal-title">
+        <div id="modal-content"></div>
+    </dialog>
+
+    <footer><div class="shell">Datos de personajes obtenidos de <span>Rick and Morty API</span></div></footer>
+    <script src="app.js"></script>
+</body>
+</html>
